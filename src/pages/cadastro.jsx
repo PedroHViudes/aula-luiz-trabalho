@@ -47,6 +47,8 @@ export default function Cadastro() {
             closeButton: () => (<button onClick={() => navigate('/')}>Login</button>),
         })
 
+        localStorage.setItem("usuarioLogado", JSON.stringify(usuario));
+
     }
 
     function validarEmail() {

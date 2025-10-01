@@ -14,12 +14,15 @@ export default function CadastroAtividade() {
     function handleSubmit(e) {
         e.preventDefault();
 
+
+
         const novaTarefa = {
             "tituloatv": tituloatv,
             "descricao": descricao,
             "data": datac,
             "prioridade": prioridade
         };
+
 
         const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
 
