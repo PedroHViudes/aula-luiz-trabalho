@@ -4,14 +4,50 @@ import Rodape from "../components/rodape";
 
 export default function Listagem() {
   const [tarefas, setTarefas] = useState([]);
+ 
 
   useEffect(() => {
     const listaDeTarefasSalvas = localStorage.getItem('TAREFAS_CADASTRADAS');
     if (listaDeTarefasSalvas) {
       setTarefas(JSON.parse(listaDeTarefasSalvas));
     }
-  }, []); // O array vazio [] faz com que o useEffect rode apenas uma vez, na primeira vez que a página é carregada.
+  }, []); 
 
+
+
+
+
+  const handleDelete = (indexDelete) => {
+      const temCerteza = confirm("Tem certeza que deseja excluir esta atividade?");
+
+    
+    if (temCerteza) {
+        setTarefas(tarefas.filter((tarefa, index) => index !== indexDelete));
+        localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(tarefas.filter((tarefa, index) => index !== indexDelete)));
+    }
+};
+
+const handleConcluir = (indexConcluir) => {
+    const certeza = confirm("Tem certeza que deseja marcar esta atividade como concluída?");
+
+    if (certeza) {
+        
+        const listaAtualizada = tarefas.map((tarefa, index) => {
+            
+            if (index === indexConcluir) {
+               
+                return { ...tarefa, status: "Concluída" };
+                
+            }
+            
+            return tarefa;
+        });
+
+        setTarefas(listaAtualizada);
+        localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(listaAtualizada));
+    }
+};
+  
   return (
     <>
       <Cabecalho />
@@ -34,7 +70,7 @@ export default function Listagem() {
                 </thead>
                 <tbody>
                   {tarefas.map((tarefa, index) => (
-                    <tr key={index}>
+                    <tr key={index} className={tarefa.status === "Concluída" ? "tarefa-concluida" : "" }>
                       <td>{tarefa.tituloatv}</td>
                       <td>{tarefa.descricao}</td>
                       <td>{tarefa.data}</td>
@@ -44,8 +80,8 @@ export default function Listagem() {
                       </td>
                       <td>{tarefa.criadoPor}</td> 
                       <td className="acoes">
-                        <button>Concluir</button>
-                        <button>Excluir</button>
+                        <button onClick={() => handleConcluir(index)}>Concluir</button>
+                        <button onClick={() => handleDelete(index)}>Excluir</button>
                       </td>
                     </tr>
                   ))}

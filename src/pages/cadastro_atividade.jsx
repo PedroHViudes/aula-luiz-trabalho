@@ -11,10 +11,22 @@ export default function CadastroAtividade() {
     const [datac, setDatac] = useState("");
     const [prioridade, setPrioridade] = useState("");
 
+    function validarData(dataString) {
+    
+    const regexData = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
+    
+    
+    return regexData.test(dataString);
+}
+
     function handleSubmit(e) {
-        e.preventDefault();
+    e.preventDefault();
 
-
+    
+    if (!validarData(datac)) {
+        toast.error("Por favor, insira uma data no formato DD/MM/AAAA.");
+        return;
+    }
 
         const novaTarefa = {
             "tituloatv": tituloatv,
