@@ -1,53 +1,56 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Cabecalho from "../components/cabecalho";
 import Rodape from "../components/rodape";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function Listagem() {
   const [tarefas, setTarefas] = useState([]);
- 
 
-  useEffect(() => {
-    const listaDeTarefasSalvas = localStorage.getItem('TAREFAS_CADASTRADAS');
-    if (listaDeTarefasSalvas) {
-      setTarefas(JSON.parse(listaDeTarefasSalvas));
-    }
-  }, []); 
+  // A nova lógica é colocada aqui, antes do return
+  const listaDeTarefasSalvas = localStorage.getItem('TAREFAS_CADASTRADAS');
+  const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
+
+  // Cria uma lista filtrada para ser exibida
+  const listaParaExibir = [];
+
+  if (listaDeTarefasSalvas && usuarioLogado) {
+    const tarefasCompletas = JSON.parse(listaDeTarefasSalvas);
+    const tarefasDoUsuario = tarefasCompletas.filter(tarefa => {
+      return tarefa.criadoPor === usuarioLogado.nome;
+    });
+    listaParaExibir.push(...tarefasDoUsuario);
+  }
 
 
+  // Funções de manipulação
+  const handleUndo = (tarefaRestaurada, indexOriginal) => {
+    const listaParaRestaurar = [...tarefas];
+    listaParaRestaurar.splice(indexOriginal, 0, tarefaRestaurada);
+    setTarefas(listaParaRestaurar);
+    localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(listaParaRestaurar));
+  };
 
+  const handleDelete = (indexParaExcluir) => {
+    const tarefaExcluida = tarefas[indexParaExcluir];
+    const novaLista = tarefas.filter((tarefa, index) => index !== indexParaExcluir);
 
+    setTarefas(novaLista);
+    localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(novaLista));
 
-  const handleDelete = (indexDelete) => {
-      const temCerteza = confirm("Tem certeza que deseja excluir esta atividade?");
+    toast.success(({ closeToast }) => (
+      <div>
+        Atividade excluída com sucesso!
+        <button onClick={() => {
+          handleUndo(tarefaExcluida, indexParaExcluir);
+          closeToast();
+        }}>
+          Desfazer
+        </button>
+      </div>
+    ));
+  };
 
-    
-    if (temCerteza) {
-        setTarefas(tarefas.filter((tarefa, index) => index !== indexDelete));
-        localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(tarefas.filter((tarefa, index) => index !== indexDelete)));
-    }
-};
-
-const handleConcluir = (indexConcluir) => {
-    const certeza = confirm("Tem certeza que deseja marcar esta atividade como concluída?");
-
-    if (certeza) {
-        
-        const listaAtualizada = tarefas.map((tarefa, index) => {
-            
-            if (index === indexConcluir) {
-               
-                return { ...tarefa, status: "Concluída" };
-                
-            }
-            
-            return tarefa;
-        });
-
-        setTarefas(listaAtualizada);
-        localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(listaAtualizada));
-    }
-};
-  
   return (
     <>
       <Cabecalho />
@@ -69,8 +72,8 @@ const handleConcluir = (indexConcluir) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tarefas.map((tarefa, index) => (
-                    <tr key={index} className={tarefa.status === "Concluída" ? "tarefa-concluida" : "" }>
+                  {listaParaExibir.map((tarefa, index) => (
+                    <tr key={index} className={tarefa.status === "Concluída" ? "tarefa-concluida" : ""}>
                       <td>{tarefa.tituloatv}</td>
                       <td>{tarefa.descricao}</td>
                       <td>{tarefa.data}</td>
@@ -78,7 +81,7 @@ const handleConcluir = (indexConcluir) => {
                       <td>
                         <span className="status-">{tarefa.status || "Pendente"}</span>
                       </td>
-                      <td>{tarefa.criadoPor}</td> 
+                      <td>{tarefa.criadoPor}</td>
                       <td className="acoes">
                         <button onClick={() => handleConcluir(index)}>Concluir</button>
                         <button onClick={() => handleDelete(index)}>Excluir</button>
@@ -91,8 +94,8 @@ const handleConcluir = (indexConcluir) => {
           </div>
         </div>
       </main>
-
       <Rodape />
+      <ToastContainer />
     </>
   );
 }

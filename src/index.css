@@ -246,6 +246,6 @@ footer {
   
 }
 .tarefa-concluida:hover {
-  background-color: lightgreen; /* Cor de fundo da linha concluída */
-  cursor: default; /* Remove o cursor de "mãozinha" se houver */
+  background-color: lightgreen; 
+  cursor: default; 
 }

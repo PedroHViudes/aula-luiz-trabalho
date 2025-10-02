@@ -3,6 +3,7 @@ import Cabecalho from "../components/cabecalho";
 import Rodape from "../components/rodape";
 import { toast } from "react-toastify";
 import { ToastContainer } from "react-toastify";
+import { USUARIOLOGADO } from "../utils/constantes";
 
 export default function CadastroAtividade() {
 
@@ -12,21 +13,21 @@ export default function CadastroAtividade() {
     const [prioridade, setPrioridade] = useState("");
 
     function validarData(dataString) {
-    
-    const regexData = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
-    
-    
-    return regexData.test(dataString);
-}
+
+        const regexData = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/(19|20)\d{2}$/;
+
+
+        return regexData.test(dataString);
+    }
 
     function handleSubmit(e) {
-    e.preventDefault();
+        e.preventDefault();
 
-    
-    if (!validarData(datac)) {
-        toast.error("Por favor, insira uma data no formato DD/MM/AAAA.");
-        return;
-    }
+
+        if (!validarData(datac)) {
+            toast.error("Por favor, insira uma data no formato DD/MM/AAAA.");
+            return;
+        }
 
         const novaTarefa = {
             "tituloatv": tituloatv,
@@ -41,7 +42,7 @@ export default function CadastroAtividade() {
         if (usuarioLogado && usuarioLogado.nome) {
             novaTarefa.criadoPor = usuarioLogado.nome;
         } else {
-            novaTarefa.criadoPor = "Usuário Desconhecido";
+
         }
 
         let cadastroTarefas = localStorage.getItem('TAREFAS_CADASTRADAS') != null ? JSON.parse(localStorage.getItem('TAREFAS_CADASTRADAS')) : [];
