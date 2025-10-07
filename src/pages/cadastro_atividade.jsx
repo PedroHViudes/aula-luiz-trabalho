@@ -30,10 +30,12 @@ export default function CadastroAtividade() {
         }
 
         const novaTarefa = {
+            "id": Date.now(), 
             "tituloatv": tituloatv,
             "descricao": descricao,
             "data": datac,
-            "prioridade": prioridade
+            "prioridade": prioridade,
+            "status": "Pendente" 
         };
 
 
@@ -42,14 +44,15 @@ export default function CadastroAtividade() {
         if (usuarioLogado && usuarioLogado.nome) {
             novaTarefa.criadoPor = usuarioLogado.nome;
         } else {
-
+            toast.error("Usuário não logado. Não é possível cadastrar a atividade.");
+            return;
         }
 
-        let cadastroTarefas = localStorage.getItem('TAREFAS_CADASTRADAS') != null ? JSON.parse(localStorage.getItem('TAREFAS_CADASTRADAS')) : [];
+        let cadastroTarefas = localStorage.getItem("TAREFAS_CADASTRADAS") != null ? JSON.parse(localStorage.getItem("TAREFAS_CADASTRADAS")) : [];
 
         cadastroTarefas.push(novaTarefa);
 
-        localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(cadastroTarefas));
+        localStorage.setItem("TAREFAS_CADASTRADAS", JSON.stringify(cadastroTarefas));
 
         toast.success("Atividade cadastrada com sucesso!");
 

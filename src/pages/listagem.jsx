@@ -1,54 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Cabecalho from "../components/cabecalho";
 import Rodape from "../components/rodape";
 import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 export default function Listagem() {
-  const [tarefas, setTarefas] = useState([]);
+  const [tarefas, setTarefas] = useState(() => {
+    const listaDeTarefasSalvas = localStorage.getItem('TAREFAS_CADASTRADAS');
+    return listaDeTarefasSalvas ? JSON.parse(listaDeTarefasSalvas) : [];
+  });
 
-  // A nova lógica é colocada aqui, antes do return
-  const listaDeTarefasSalvas = localStorage.getItem('TAREFAS_CADASTRADAS');
+  
+  useEffect(() => {
+    localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(tarefas));
+  }, [tarefas]);
+
   const usuarioLogado = JSON.parse(localStorage.getItem("usuarioLogado"));
 
-  // Cria uma lista filtrada para ser exibida
-  const listaParaExibir = [];
-
-  if (listaDeTarefasSalvas && usuarioLogado) {
-    const tarefasCompletas = JSON.parse(listaDeTarefasSalvas);
-    const tarefasDoUsuario = tarefasCompletas.filter(tarefa => {
-      return tarefa.criadoPor === usuarioLogado.nome;
-    });
-    listaParaExibir.push(...tarefasDoUsuario);
-  }
+  const listaParaExibir = tarefas.filter(tarefa => {
+    return usuarioLogado && tarefa.criadoPor === usuarioLogado.nome;
+  });
 
 
-  // Funções de manipulação
   const handleUndo = (tarefaRestaurada, indexOriginal) => {
-    const listaParaRestaurar = [...tarefas];
-    listaParaRestaurar.splice(indexOriginal, 0, tarefaRestaurada);
-    setTarefas(listaParaRestaurar);
-    localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(listaParaRestaurar));
-  };
+  setTarefas((tarefasAtuais) => {
+    const novaLista = [...tarefasAtuais];
+    if (indexOriginal === -1 || indexOriginal > novaLista.length) {
+      novaLista.push(tarefaRestaurada);
+    } else {
+      novaLista.splice(indexOriginal, 0, tarefaRestaurada);
+    }
+    return novaLista;
+  });
+};
 
-  const handleDelete = (indexParaExcluir) => {
-    const tarefaExcluida = tarefas[indexParaExcluir];
-    const novaLista = tarefas.filter((tarefa, index) => index !== indexParaExcluir);
+  const handleDelete = (idTarefaParaExcluir) => {
+    const tarefaExcluida = tarefas.find(tarefa => tarefa.id === idTarefaParaExcluir);
+    const indexOriginal = tarefas.findIndex(tarefa => tarefa.id === idTarefaParaExcluir);
+    const novaLista = tarefas.filter(tarefa => tarefa.id !== idTarefaParaExcluir);
 
     setTarefas(novaLista);
-    localStorage.setItem('TAREFAS_CADASTRADAS', JSON.stringify(novaLista));
 
     toast.success(({ closeToast }) => (
       <div>
         Atividade excluída com sucesso!
         <button onClick={() => {
-          handleUndo(tarefaExcluida, indexParaExcluir);
+          handleUndo(tarefaExcluida, indexOriginal);
           closeToast();
         }}>
           Desfazer
         </button>
       </div>
     ));
+  };
+
+  const handleConcluir = (idTarefaParaConcluir) => {
+    const novaLista = tarefas.map(tarefa => {
+      if (tarefa.id === idTarefaParaConcluir) {
+        return { ...tarefa, status: tarefa.status === "Concluída" ? "Pendente" : "Concluída" };
+      }
+      return tarefa;
+    });
+    setTarefas(novaLista);
   };
 
   return (
@@ -72,8 +85,8 @@ export default function Listagem() {
                   </tr>
                 </thead>
                 <tbody>
-                  {listaParaExibir.map((tarefa, index) => (
-                    <tr key={index} className={tarefa.status === "Concluída" ? "tarefa-concluida" : ""}>
+                  {listaParaExibir.map((tarefa) => (
+                    <tr key={tarefa.id} className={tarefa.status === "Concluída" ? "tarefa-concluida" : ""}>
                       <td>{tarefa.tituloatv}</td>
                       <td>{tarefa.descricao}</td>
                       <td>{tarefa.data}</td>
@@ -83,8 +96,8 @@ export default function Listagem() {
                       </td>
                       <td>{tarefa.criadoPor}</td>
                       <td className="acoes">
-                        <button onClick={() => handleConcluir(index)}>Concluir</button>
-                        <button onClick={() => handleDelete(index)}>Excluir</button>
+                        <button onClick={() => handleConcluir(tarefa.id)}>Concluir</button>
+                        <button onClick={() => handleDelete(tarefa.id)}>Excluir</button>
                       </td>
                     </tr>
                   ))}
