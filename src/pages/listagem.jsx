@@ -22,7 +22,7 @@ export default function Listagem() {
   });
 
 
-  const handleUndo = (tarefaRestaurada, indexOriginal) => {
+  const handleRedefinir = (tarefaRestaurada, indexOriginal) => {
   setTarefas((tarefasAtuais) => {
     const novaLista = [...tarefasAtuais];
     if (indexOriginal === -1 || indexOriginal > novaLista.length) {
@@ -45,7 +45,7 @@ export default function Listagem() {
       <div>
         Atividade excluída com sucesso!
         <button onClick={() => {
-          handleUndo(tarefaExcluida, indexOriginal);
+          handleRedefinir(tarefaExcluida, indexOriginal);
           closeToast();
         }}>
           Desfazer
